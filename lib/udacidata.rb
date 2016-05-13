@@ -11,6 +11,7 @@ class Udacidata
     @brand = @product.brand
     @name = @product.name
     @price = @product.price
+    Module::create_finder_methods("id", "brand", "name", "price")
     @data_path = File.dirname(__FILE__) + "/../data/data.csv"
     CSV.open(@data_path, "a") do |csv|
       csv << ["#{@product.id}", " #{@product.brand}", " #{@product.name}", " #{@product.price}"]
