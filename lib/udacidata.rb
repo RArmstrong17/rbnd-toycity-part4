@@ -14,7 +14,7 @@ class Udacidata
     Module::create_finder_methods("id", "brand", "name", "price")
     @data_path = File.dirname(__FILE__) + "/../data/data.csv"
     CSV.open(@data_path, "a") do |csv|
-      csv << ["#{@product.id}", " #{@product.brand}", " #{@product.name}", " #{@product.price}"]
+      csv << ["#{@product.id}", "#{@product.brand}", "#{@product.name}", "#{@product.price}"]
     end
     @products.push(@product)
     return @product
@@ -45,14 +45,36 @@ class Udacidata
   end
 
   def self.destroy(position)
-    arr = CSV.read(@data_path)
-    arr.delete(arr[position])
-    CSV.open(@data_path, "w") do |csv|
+    arr = CSV.read(@data_path, headers: true)
+    arr.delete(arr[position - 1])
+    CSV.open(@data_path, "w+") do |csv|
       arr.each do |row|
-        csv << ["#{row[1]}"," #{row[2]}"," #{row[3]}"," #{row[4]}"]
+        csv << ["#{row["id"]}"," #{row["brand"]}"," #{row["name"]}"," #{row["price"]}"]
       end
     end
     return @products.delete_at(position - 1)
   end
 
+  def update(options = {})
+    @data_path = File.dirname(__FILE__) + "/../data/data.csv"
+    arr = CSV.read(@data_path, headers: true)
+    CSV.open(@data_path, "w+") do |output|
+      change = arr[self.id - 1]
+      change["brand"] = options[:brand] if options[:brand]
+      change["product"] = options[:name] if options[:name]
+      change["price"] = options[:price] if options[:price]
+      output << ["id","brand","product","price"]
+      arr.each do |row|
+        if row["id"] == self.id - 1
+          output << ["#{change["id"]}", "#{change["brand"]}", "#{change["product"]}", "#{change["price"]}"]
+        else
+          output << ["#{row["id"]}","#{row["brand"]}","#{row["product"]}","#{row["price"]}"]
+        end
+      end
+    end
+    @brand = options[:brand] if options[:brand]
+    @name = options[:name] if options[:name]
+    @price = options[:price] if options[:price]
+    return self
+  end
 end

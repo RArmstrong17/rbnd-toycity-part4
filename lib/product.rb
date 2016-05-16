@@ -1,7 +1,7 @@
 require_relative 'udacidata'
 
 class Product < Udacidata
-  attr_reader :id, :price, :brand, :name
+  attr_reader :id, :brand, :name, :price
   @products = Array.new
   def initialize(opts={})
     # Get last ID from the database if ID exists

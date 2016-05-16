@@ -9,5 +9,14 @@ class Module
         return @products.detect{|product| product.price == arg} if attribute == "price"
       end
     end
+    define_method(:where) do |**arg|
+      arg.each do |key, value|
+        atrib = key.to_s
+        @search = @products.find_all{|product| product.brand == value } if atrib == "brand"
+        @search = @products.find_all{|product| product.name == value } if atrib == "name"
+        @search = @products.find_all{|product| product.price == value } if atrib == "price"
+      end
+      return @search
+    end
   end
 end
