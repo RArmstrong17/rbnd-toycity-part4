@@ -11,12 +11,12 @@ class Udacidata
     @brand = @product.brand
     @name = @product.name
     @price = @product.price
-    Module::create_finder_methods("id", "brand", "name", "price")
+    @products.push(@product)
     @data_path = File.dirname(__FILE__) + "/../data/data.csv"
-    CSV.open(@data_path, "a") do |csv|
+    CSV.open(@data_path, "ab") do |csv|
       csv << ["#{@product.id}", "#{@product.brand}", "#{@product.name}", "#{@product.price}"]
     end
-    @products.push(@product)
+    Module::create_finder_methods("id", "brand", "name", "price")
     return @product
   end
 
@@ -24,49 +24,70 @@ class Udacidata
     @products
   end
 
-  def self.first(length = 1)
-    if length == 1
+  def self.first(amount = 1)
+    if amount == 1
       @products.first
     else
-      @products.first(length)
+      @products.first(amount)
     end
   end
 
-  def self.last(length = 1)
-    if length != 1
-      @products.last(length)
+  def self.last(amount = 1)
+    if amount != 1
+      @products.last(amount)
     else
       @products.last
     end
   end
 
-  def self.find(index)
-    return @products.at((index-1))
+  def self.find(position)
+    raise Product_ID_Doesnt_Exist, "There is no product with that ID" if position > @products.last.id.to_int
+    @products.each do |product|
+      if @products.any?{|product| product.id == position}
+        @find = product if position == product.id
+      else
+        raise Product_ID_Doesnt_Exist, "There is no product with that ID"
+      end
+    end
+    return @find
   end
 
   def self.destroy(position)
-    arr = CSV.read(@data_path, headers: true)
-    arr.delete(arr[position - 1])
-    CSV.open(@data_path, "w+") do |csv|
-      arr.each do |row|
-        csv << ["#{row["id"]}"," #{row["brand"]}"," #{row["name"]}"," #{row["price"]}"]
+    raise Product_ID_Doesnt_Exist, "There is no product with that ID" if position > @products.last.id.to_int
+    @products.each do |product|
+      if @products.any?{|product| product.id == position}
+        @to_delete = product if position == product.id
+      else
+        raise Product_ID_Doesnt_Exist, "There is no product with that ID"
       end
     end
-    return @products.delete_at(position - 1)
+    arr = CSV.read(@data_path, headers: true)
+      CSV.open(@data_path, "w+") do |csv|
+        csv << ["id","brand","product","price"]
+          arr.each do |row|
+            if row["id"] == position.to_s
+            else
+              csv << ["#{row["id"]}"," #{row["brand"]}"," #{row["product"]}"," #{row["price"]}"]
+            end
+          end
+      end
+    return @products.delete(@to_delete)
   end
 
   def update(options = {})
     @data_path = File.dirname(__FILE__) + "/../data/data.csv"
     arr = CSV.read(@data_path, headers: true)
     CSV.open(@data_path, "w+") do |output|
-      change = arr[self.id - 1]
-      change["brand"] = options[:brand] if options[:brand]
-      change["product"] = options[:name] if options[:name]
-      change["price"] = options[:price] if options[:price]
+      arr.each do |row|
+        @change = row if row["id"] == self.id.to_s
+      end
+      @change["brand"] = options[:brand] if options[:brand]
+      @change["product"] = options[:name] if options[:name]
+      @change["price"] = options[:price] if options[:price]
       output << ["id","brand","product","price"]
       arr.each do |row|
-        if row["id"] == self.id - 1
-          output << ["#{change["id"]}", "#{change["brand"]}", "#{change["product"]}", "#{change["price"]}"]
+        if row["id"] == self.id
+          output << ["#{self.id}", "#{@change["brand"]}", "#{@change["product"]}", "#{@change["price"]}"]
         else
           output << ["#{row["id"]}","#{row["brand"]}","#{row["product"]}","#{row["price"]}"]
         end

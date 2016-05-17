@@ -9,24 +9,26 @@ module Analyzable
     return avg_price.round(2)
   end
   def print_report(products)
+    product_array = []
     products.each do |product|
-      return "#{product.id}, #{product.brand}, #{product.name}, #{product.price}"
+      product_array.push("#{product.id}, #{product.brand}, #{product.name}, #{product.price}")
     end
+    product_array.join("; ")
   end
   def count_by_brand(product_array)
+    count_hash = Hash.new(0)
+    @brand_array = []
     product_array.each do |product|
-      @brand_count = product.brand
+      count_hash[product.brand] += 1
     end
-    count_hash = Hash.new{|h,k| h[k] = nil}
-    count_hash[@brand_count] = product_array.length
     return count_hash
   end
   def count_by_name(product_array)
+    count_hash = Hash.new(0)
+    @name_array = []
     product_array.each do |product|
-      @name_count = product.name
+      count_hash[product.name] += 1
     end
-    count_hash = Hash.new{|h,k| h[k] = nil}
-    count_hash[@name_count] = product_array.length
     return count_hash
   end
 end
